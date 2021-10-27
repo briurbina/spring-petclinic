@@ -11,16 +11,16 @@ import io.cucumber.spring.CucumberContextConfiguration;
  */
 @RunWith(Cucumber.class)
 // @CucumberContextConfiguration
-// @CucumberOptions(plugin = { "pretty", "json:target/cucumber-reports/cucumber.json" },
-// // location
-// // of
-// // test
-// // result
-// // data
-// // output
-// features = { "classpath:features" }, // location of feature files
-// glue = { "org.springframework.samples.petclinic.bdd" }) // location of step
-// // implementation
+@CucumberOptions(plugin = { "pretty", "json:target/cucumber-reports/cucumber.json" },
+		// location
+		// of
+		// test
+		// result
+		// data
+		// output
+		features = { "classpath:features" }, // location of feature files
+		glue = { "org.springframework.samples.petclinic.bdd" }) // location of step
+// implementation
 
 public class CucumberTest {
 
