@@ -1,5 +1,7 @@
 package org.springframework.samples.petclinic.bdd;
 
+import org.springframework.samples.petclinic.bdd.pageobjects.NewOwnerPage;
+
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.Given;
@@ -11,10 +13,12 @@ import io.cucumber.spring.CucumberContextConfiguration;
 public class StepDef {
 
 	private Scenario scenario;
+	private NewOwnerPage newOwnerPage;
 
 	@Before
 	public void before(Scenario scenario) {
 		this.scenario = scenario;
+	//	this.newOwnerPage = new newOwnerPage(scenario.);
 	}
 
 	@Given("they see the add owner section")
