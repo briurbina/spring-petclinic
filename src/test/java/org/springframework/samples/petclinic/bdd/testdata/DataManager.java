@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.JsonSyntaxException;
 
@@ -119,15 +121,66 @@ public class DataManager {
 		return returnData;
 	}
 
-	public Persona getModdedPersona(String personaNameOrAlias, List<String> dataChunkNames) {
-		throw new PendingException("Need to implement getModdedPersona()");
-	}
-
 	public Persona getModdedPersona(String personaNameOrAlias, io.cucumber.datatable.DataTable dataModNames) {
 		List<String> column = dataModNames.column(0);
 		List<String> names = column.subList(0, column.size() - 1);
 		return this.getModdedPersona(personaNameOrAlias, names);
 
+	}
+
+	public Persona getModdedPersona(String personaNameOrAlias, List<String> dataChunkNames) {
+		Persona targetPersona = this.personaLookup.get(personaNameOrAlias);
+		List<DataChunk> chunks = new ArrayList<>();
+		for (String chunkName : dataChunkNames) {
+			chunks.add(this.dataChunkLookup.get(chunkName));
+		}
+
+		for (DataChunk chunk : chunks) {
+			Set<String> keys = chunk.dataMap.keySet();
+			for (String key : keys) {
+				Class personaClass = targetPersona.getClass();
+				String value = chunk.dataMap.get(key);
+				try {
+					Field field = personaClass.getDeclaredField(key);
+					Class fieldType = field.getType();
+					if (fieldType.equals(int.class)) {
+						field.set(targetPersona, Integer.parseInt(value));
+					}
+					else if (fieldType.equals(double.class)) {
+						field.set(targetPersona, Double.parseDouble(value));
+					}
+					else if (fieldType.equals(boolean.class)) {
+						field.set(targetPersona, Boolean.parseBoolean(value));
+					}
+					else if (fieldType.equals(float.class)) {
+						field.set(targetPersona, Float.parseFloat(value));
+					}
+					else if (fieldType.equals(char.class)) {
+						field.set(targetPersona, value.charAt(0));
+					}
+					else if (fieldType.equals(byte.class)) {
+						field.set(targetPersona, (byte) value.charAt(0));
+					}
+					else if (fieldType.equals(long.class)) {
+						field.set(targetPersona, Long.parseLong(value));
+					}
+					else if (fieldType.equals(String.class)) {
+						field.set(targetPersona, value);
+					}
+					else {
+						throw new RuntimeException("Could not identify field type for propery: " + key);
+					}
+					field.set(targetPersona, value);
+				}
+				catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+					System.out.println("Uanble to set the property '" + key + "' with value: '" + value);
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		return targetPersona;
 	}
 
 }

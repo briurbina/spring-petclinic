@@ -1,0 +1,6 @@
+{
+    "name": "false email",
+    "dataMap" : {
+        "email":"bad-email"
+    }
+}
