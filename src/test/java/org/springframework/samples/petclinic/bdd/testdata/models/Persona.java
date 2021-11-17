@@ -9,9 +9,17 @@ public class Persona {
 
 	public List<String> aliases = new ArrayList<>();
 
-	public String email;
-
 	public String accountKey;
+
+	public String firstName;
+
+	public String lastName;
+
+	public String address;
+
+	public String city;
+
+	public String telephone;
 
 	public String getName() {
 		return this.name;

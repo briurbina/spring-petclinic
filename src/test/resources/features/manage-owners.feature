@@ -4,11 +4,11 @@ Feature: Manage Owners
 
     Scenario: new owner is added to system
     Given they see the add owner section
-    When they submit "Bri Cat Lover" as a new owner
-    Then they see the "Bri" profile
+    When they submit "Mabel Pines Pig Lover" as a new owner
+    Then they see the "Mabel Pines" profile
 
-    Scenario: new pet is associated to owner
-    Scenario: pet profile is updated
-    Scenario: a new visit is added
-    Scenario: owner profile is updated
-    Scenario: Duplicate owner is added
+    # Scenario: new pet is associated to owner
+    # Scenario: pet profile is updated
+    # Scenario: a new visit is added
+    # Scenario: owner profile is updated
+    # Scenario: Duplicate owner is added

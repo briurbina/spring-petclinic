@@ -1,5 +1,9 @@
 {
     "name": "Mabel Pines",
     "aliases": ["Mabel Pines Pig Lover", "Shooting Star"],
-    "email": "mabel.pines@test.ddd"
+    "firstName" : "Mabel",
+	"lastName": "Pines",
+	"address": "123 Mystery Shack Drive",
+	"city": "Gravity Falls",
+	"telephone": "1234567890"
 }
