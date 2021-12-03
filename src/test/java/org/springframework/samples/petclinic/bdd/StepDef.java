@@ -10,6 +10,7 @@ import org.springframework.samples.petclinic.bdd.pageobjects.NewOwnerPage;
 import org.springframework.samples.petclinic.bdd.pageobjects.OwnerInfoPage;
 import org.springframework.samples.petclinic.bdd.testdata.DataManager;
 import org.springframework.samples.petclinic.bdd.testdata.models.Persona;
+import org.springframework.samples.petclinic.bdd.testdata.models.Pet;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -91,6 +92,13 @@ public class StepDef {
 	public void they_see_the_profile(String personaName) {
 		Persona persona = this.dataManager.findPersonaByNameOrAlias(personaName);
 		this.ownerInfoPage.validateOwnerInfo(persona);
+		List<Persona> personas = this.dataManager.getPersonasByChunkName("personas chunk");
+		for (Persona p : personas) {
+			System.out.println("Persona: " + p.getName());
+			for (Pet pet : p.pets) {
+				System.out.println("Pet: " + pet.name);
+			}
+		}
 	}
 
 }

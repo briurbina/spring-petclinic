@@ -1,0 +1,16 @@
+{
+    "name": "Pet Owner",
+    "aliases": ["Loves lizards"],
+    "firstName" : "Mabel",
+    "lastName": "Pines",
+    "address": "123 Mystery Shack Drive",
+    "city": "Gravity Falls",
+    "telephone": "1234567890",
+    "pets": [
+        {
+            "name": "Iggy",
+            "birthDate": "2010-11-30",
+            "type": "lizard"
+        }
+    ]
+}

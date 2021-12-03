@@ -21,6 +21,8 @@ public class Persona {
 
 	public String telephone;
 
+	public List<Pet> pets = new ArrayList<Pet>();
+
 	public String getName() {
 		return this.name;
 	}

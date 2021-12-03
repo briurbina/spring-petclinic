@@ -53,6 +53,16 @@ public class DataManager {
 		return this.activePersona;
 	}
 
+	public List<Persona> getPersonasByChunkName(String chunkName) {
+		List<Persona> personas = new ArrayList<Persona>();
+		DataChunk data = this.dataChunkLookup.get(chunkName);
+		Set<String> names = data.dataMap.keySet();
+		for (String name : names) {
+			personas.add(this.personaLookup.get(name));
+		}
+		return personas;
+	}
+
 	public DataChunk findDataByName(String name) {
 		return this.dataChunkLookup.get(name);
 	}
