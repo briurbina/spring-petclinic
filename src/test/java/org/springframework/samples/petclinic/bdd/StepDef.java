@@ -6,11 +6,13 @@ import java.util.List;
 import org.assertj.core.util.Arrays;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.springframework.samples.petclinic.bdd.pageobjects.FindOwnerPage;
+import org.springframework.samples.petclinic.bdd.pageobjects.FindOwnerResultsPage;
 import org.springframework.samples.petclinic.bdd.pageobjects.NewOwnerPage;
 import org.springframework.samples.petclinic.bdd.pageobjects.OwnerInfoPage;
 import org.springframework.samples.petclinic.bdd.testdata.DataManager;
+import org.springframework.samples.petclinic.bdd.testdata.models.DataChunk;
 import org.springframework.samples.petclinic.bdd.testdata.models.Persona;
-import org.springframework.samples.petclinic.bdd.testdata.models.Pet;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -59,9 +61,15 @@ public class StepDef {
 
 	private OwnerInfoPage ownerInfoPage;
 
+	private FindOwnerPage findOwnerPage;
+
+	private FindOwnerResultsPage findOwnerResultsPage;
+
 	private DataManager dataManager;
 
 	private WebDriver driver;
+
+	// TODO: currenty tied to chrome
 
 	public StepDef() {
 		WebDriverManager.chromedriver().setup();
@@ -75,6 +83,9 @@ public class StepDef {
 		this.newOwnerPage = new NewOwnerPage(driver);
 		this.dataManager = DataManager.getInstance();
 		this.ownerInfoPage = new OwnerInfoPage(driver);
+		this.findOwnerPage = new FindOwnerPage(driver);
+		this.findOwnerResultsPage = new FindOwnerResultsPage(driver);
+
 	}
 
 	@Given("they see the add owner section")
@@ -92,13 +103,22 @@ public class StepDef {
 	public void they_see_the_profile(String personaName) {
 		Persona persona = this.dataManager.findPersonaByNameOrAlias(personaName);
 		this.ownerInfoPage.validateOwnerInfo(persona);
-		List<Persona> personas = this.dataManager.getPersonasByChunkName("personas chunk");
-		for (Persona p : personas) {
-			System.out.println("Persona: " + p.getName());
-			for (Pet pet : p.pets) {
-				System.out.println("Pet: " + pet.name);
-			}
-		}
+	}
+
+	@Given("they see the find owners section")
+	public void they_see_the_find_owners_section() {
+		this.findOwnerPage.open();
+	}
+
+	@When("they search for {string}")
+	public void they_search_for(String string) {
+		this.findOwnerPage.search(string);
+	}
+
+	@Then("they see the results for a {string}")
+	public void they_see_the_results_for_a(String string) {
+		List<Persona> personas = this.dataManager.getPersonasByChunkName(string);
+		this.findOwnerResultsPage.validateOwnerResults(personas);
 	}
 
 }

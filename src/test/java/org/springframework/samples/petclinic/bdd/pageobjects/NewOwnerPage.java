@@ -38,6 +38,7 @@ public class NewOwnerPage {
 	private WebElement btnAddOwner;
 
 	// TODO: modify to not need base URL
+
 	public void open() {
 		this.driver.navigate().to("http://localhost:8080/owners/new");
 	}

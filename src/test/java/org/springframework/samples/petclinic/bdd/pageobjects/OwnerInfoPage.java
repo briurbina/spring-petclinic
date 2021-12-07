@@ -14,11 +14,6 @@ public class OwnerInfoPage {
 
 	public WebDriver driver;
 
-	public OwnerInfoPage(WebDriver driver) {
-		PageFactory.initElements(driver, this);
-		this.driver = driver;
-	}
-
 	@FindBy(how = How.CSS, using = "body > div > div > h2:nth-child(1)")
 	private WebElement titleOwnerInfo;
 
@@ -33,6 +28,11 @@ public class OwnerInfoPage {
 
 	@FindBy(how = How.CSS, using = "body > div > div > table:nth-child(2) > tbody > tr:nth-child(4) > td")
 	private WebElement fieldTelephone;
+
+	public OwnerInfoPage(WebDriver driver) {
+		PageFactory.initElements(driver, this);
+		this.driver = driver;
+	}
 
 	public void validateOwnerInfo(Persona persona) {
 		assertEquals(persona.name, this.fieldName.getText());

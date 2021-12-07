@@ -1,0 +1,16 @@
+{
+    "name": "Betty Davis",
+    "aliases": ["Ms. Davis", "Betty"],
+    "firstName" : "Betty",
+	"lastName": "Davis",
+	"address": "638 Cardinal Ave.",
+	"city": "Sun Prairie",
+	"telephone": "6085551749",
+	"pets": [
+        {
+            "name": "Basil",
+            "birthDate": "2012-08-06",
+            "type": "hamster"
+        }
+    ]
+}

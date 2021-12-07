@@ -1,0 +1,16 @@
+{
+    "name": "Harold Davis",
+    "aliases": ["Mr. Davis", "Harold"],
+    "firstName" : "Harold",
+	"lastName": "Davis",
+	"address": "563 Friendly St.",
+	"city": "Windsor",
+	"telephone": "6085553198",
+	"pets": [
+        {
+            "name": "Iggy",
+            "birthDate": "2010-11-30",
+            "type": "lizard"
+        }
+    ]
+}
