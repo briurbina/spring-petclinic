@@ -8,15 +8,19 @@ import org.openqa.selenium.support.FindAll;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.How;
 import org.openqa.selenium.support.PageFactory;
+import org.springframework.samples.petclinic.bdd.World;
 import org.springframework.samples.petclinic.bdd.testdata.models.Persona;
 
 public class NewOwnerPage {
 
-	public WebDriver driver;
+	private WebDriver driver;
 
-	public NewOwnerPage(WebDriver driver) {
+	private World world;
+
+	public NewOwnerPage(WebDriver driver, World world) {
 		PageFactory.initElements(driver, this);
 		this.driver = driver;
+		this.world = world;
 	}
 
 	@FindBy(how = How.ID, using = "firstName")
@@ -40,7 +44,7 @@ public class NewOwnerPage {
 	// TODO: modify to not need base URL
 
 	public void open() {
-		this.driver.navigate().to("http://localhost:8080/owners/new");
+		this.driver.navigate().to(world.baseUrl + "owners/new");
 	}
 
 	public void fillOutForm(Persona persona) {

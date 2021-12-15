@@ -28,6 +28,8 @@ public class DataManager {
 
 	Map<String, DataChunk> dataChunkLookup = new HashMap<>();
 
+	// may need pets, but can do lookup
+
 	Persona activePersona;
 
 	private static DataManager activeInstance = new DataManager();
@@ -53,6 +55,7 @@ public class DataManager {
 		return this.activePersona;
 	}
 
+	// allows to give name to group of personas
 	public List<Persona> getPersonasByChunkName(String chunkName) {
 		List<Persona> personas = new ArrayList<Persona>();
 		DataChunk data = this.dataChunkLookup.get(chunkName);
@@ -84,6 +87,7 @@ public class DataManager {
 		}
 	}
 
+	// dont add data modifiers here do it in one of two above
 	private <T> List<T> getDataFromJsonFiles(Class<T> objClass, Class<T[]> arrayClass, String folderName) {
 		List<T> returnData = new ArrayList<>();
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();

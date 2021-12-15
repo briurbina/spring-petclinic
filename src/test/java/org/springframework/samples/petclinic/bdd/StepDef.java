@@ -6,6 +6,7 @@ import java.util.List;
 import org.assertj.core.util.Arrays;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.bdd.pageobjects.FindOwnerPage;
 import org.springframework.samples.petclinic.bdd.pageobjects.FindOwnerResultsPage;
 import org.springframework.samples.petclinic.bdd.pageobjects.NewOwnerPage;
@@ -22,40 +23,7 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
-// class ChromeTest {
-
-//     WebDriver driver;
-
-//     @BeforeAll
-//     static void setupClass() {
-//         WebDriverManager.chromedriver().setup();
-//     }
-
-//     @BeforeEach
-//     void setupTest() {
-//         driver = new ChromeDriver();
-//     }
-
-//     @AfterEach
-//     void teardown() {
-//         driver.quit();
-//     }
-
-//     @Test
-//     void test() {
-//         // Exercise
-//         driver.get("https://bonigarcia.dev/selenium-webdriver-java/");
-//         String title = driver.getTitle();
-
-//         // Verify
-//         assertThat(title).contains("Selenium WebDriver");
-//     }
-
-// }
-@CucumberContextConfiguration
 public class StepDef {
-
-	private Scenario scenario;
 
 	private NewOwnerPage newOwnerPage;
 
@@ -67,25 +35,16 @@ public class StepDef {
 
 	private DataManager dataManager;
 
-	private WebDriver driver;
-
 	// TODO: currenty tied to chrome
 
-	public StepDef() {
-		WebDriverManager.chromedriver().setup();
-	}
-
-	@Before
-	public void before(Scenario scenario) {
-		this.scenario = scenario;
-		driver = new ChromeDriver();
-		// TODO: fix me!
-		this.newOwnerPage = new NewOwnerPage(driver);
+	@Autowired
+	public StepDef(World world) {
+		WebDriver driver = world.driver;
+		this.newOwnerPage = new NewOwnerPage(driver, world);
 		this.dataManager = DataManager.getInstance();
 		this.ownerInfoPage = new OwnerInfoPage(driver);
-		this.findOwnerPage = new FindOwnerPage(driver);
+		this.findOwnerPage = new FindOwnerPage(driver, world);
 		this.findOwnerResultsPage = new FindOwnerResultsPage(driver);
-
 	}
 
 	@Given("they see the add owner section")
