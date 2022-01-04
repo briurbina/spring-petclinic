@@ -11,7 +11,8 @@ import io.cucumber.spring.CucumberContextConfiguration;
  */
 @RunWith(Cucumber.class)
 // @CucumberContextConfiguration
-@CucumberOptions(plugin = { "pretty", "json:target/cucumber-reports/cucumber.json" },
+@CucumberOptions(
+		plugin = { "pretty", "html:target/cucumber-reports/index.html", "json:target/cucumber-reports/cucumber.json" },
 		// location
 		// of
 		// test

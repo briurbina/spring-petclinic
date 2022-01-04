@@ -55,8 +55,10 @@ public class FindOwnerResultsPage {
 
 			try {
 
-				name = tableOwners.findElement(By.cssSelector("tbody > tr:nth-child(" + i + ") > td:nth-child(1) > a"));
-				address = tableOwners.findElement(By.cssSelector("tbody > tr:nth-child(" + i + ") > td:nth-child(2)"));
+				name = tableOwners
+						.findElement(By.cssSelector("#owners > tbody > tr:nth-child(" + i + ") > td:nth-child(1) > a"));
+				address = tableOwners
+						.findElement(By.cssSelector("#owners > tbody > tr:nth-child(" + i + ") > td:nth-child(2)"));
 				city = tableOwners
 						.findElement(By.cssSelector("#owners > tbody > tr:nth-child(" + i + ") > td:nth-child(3)"));
 				telephone = tableOwners

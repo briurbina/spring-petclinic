@@ -17,6 +17,7 @@ public class OwnerInfoPage {
 	@FindBy(how = How.CSS, using = "body > div > div > h2:nth-child(1)")
 	private WebElement titleOwnerInfo;
 
+	// body > div > div > table:nth-child(2) > tbody > tr:nth-child(1) > td > b
 	@FindBy(how = How.CSS, using = "body > div > div > table:nth-child(2) > tbody > tr:nth-child(1) > td > b")
 	private WebElement fieldName;
 

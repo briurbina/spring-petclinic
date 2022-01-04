@@ -2,7 +2,10 @@ package org.springframework.samples.petclinic.bdd;
 
 import javax.management.RuntimeErrorException;
 
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
@@ -11,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.spring.CucumberContextConfiguration;
@@ -26,6 +30,8 @@ public class CucumberSpringContextConfiguration {
 	private static final Logger LOG = LoggerFactory.getLogger(CucumberSpringContextConfiguration.class);
 
 	private World world;
+
+	private WebDriver driver;
 
 	@Autowired
 	public CucumberSpringContextConfiguration(World world) {
@@ -59,6 +65,7 @@ public class CucumberSpringContextConfiguration {
 		else {
 			throw new RuntimeException("Invalid browser name!");
 		}
+		this.driver = driver;
 		return driver;
 	}
 
@@ -83,6 +90,24 @@ public class CucumberSpringContextConfiguration {
 
 		LOG.info("The Base URL is: " + baseUrl);
 		return baseUrl;
+	}
+
+	@After
+	public void embedScreenshot(Scenario scenario) throws Exception {
+		if (scenario.isFailed()) {
+			try {
+				byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+				// String testName = scenario.getName();
+				scenario.attach(screenshot, "image/png", "adding screenchot...");
+				// scenario.write(testName);
+			}
+			catch (WebDriverException wde) {
+				System.err.println(wde.getMessage());
+			}
+			catch (ClassCastException cce) {
+				cce.printStackTrace();
+			}
+		}
 	}
 
 }
