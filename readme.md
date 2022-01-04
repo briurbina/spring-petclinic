@@ -27,7 +27,7 @@ Or you can run it from Maven directly using the Spring Boot Maven plugin. If you
 To run tests with environemnt variables:
 
 ```
-./mvnw clean spring-javaformat:apply test -Dbrowser=chrome -DbaseUrl=http://localhost:8080/
+./mvnw clean spring-javaformat:apply test -Dbrowser=safari -DbaseUrl=http://localhost:8080/
 ```
 > NOTE: Windows users should set `git config core.autocrlf true` to avoid format assertions failing the build (use `--global` to set that flag globally).
 

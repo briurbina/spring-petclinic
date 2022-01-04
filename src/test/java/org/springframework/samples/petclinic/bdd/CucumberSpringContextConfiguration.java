@@ -1,6 +1,11 @@
 package org.springframework.samples.petclinic.bdd;
 
+import javax.management.RuntimeErrorException;
+
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.safari.SafariDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +30,36 @@ public class CucumberSpringContextConfiguration {
 	@Autowired
 	public CucumberSpringContextConfiguration(World world) {
 		this.world = world;
-		WebDriverManager.chromedriver().setup();
 		world.baseUrl = getBaseUrl();
-		world.driver = new ChromeDriver();
+		world.driver = getDriver(world);
+	}
+
+	private WebDriver getDriver(World world) {
+		String browser = System.getProperty("browser");
+
+		WebDriver driver;
+
+		if (browser == null) {
+			WebDriverManager.chromedriver().setup();
+			driver = new ChromeDriver();
+		}
+		else if (browser.equals("safari")) {
+			if (world.driver == null) {
+				WebDriverManager.safaridriver().setup();
+				driver = new SafariDriver();
+			}
+			else {
+				driver = world.driver;
+			}
+		}
+		else if (browser.equals("chrome")) {
+			WebDriverManager.chromedriver().setup();
+			driver = new ChromeDriver();
+		}
+		else {
+			throw new RuntimeException("Invalid browser name!");
+		}
+		return driver;
 	}
 
 	/**

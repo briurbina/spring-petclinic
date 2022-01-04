@@ -19,14 +19,14 @@ import org.springframework.samples.petclinic.bdd.testdata.models.Pet;
 
 public class FindOwnerResultsPage {
 
-	private WebDriver driver;
+	// private WebDriver driver;
 
 	@FindBy(how = How.ID, using = "owners")
 	private WebElement tableOwners;
 
 	public FindOwnerResultsPage(WebDriver driver) {
 		PageFactory.initElements(driver, this);
-		this.driver = driver;
+		// this.driver = driver;
 	}
 	// public void validateOwnerInfo(Persona persona) {
 	// assertEquals(persona.name, this.fieldName.getText());

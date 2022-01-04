@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.assertj.core.util.Arrays;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.bdd.pageobjects.FindOwnerPage;
 import org.springframework.samples.petclinic.bdd.pageobjects.FindOwnerResultsPage;
