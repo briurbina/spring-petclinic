@@ -43,7 +43,7 @@ public class StepDef {
 		this.dataManager = DataManager.getInstance();
 		this.ownerInfoPage = new OwnerInfoPage(driver);
 		this.findOwnerPage = new FindOwnerPage(driver, world);
-		this.findOwnerResultsPage = new FindOwnerResultsPage(driver);
+		this.findOwnerResultsPage = new FindOwnerResultsPage(world);
 	}
 
 	@Given("they see the add owner section")

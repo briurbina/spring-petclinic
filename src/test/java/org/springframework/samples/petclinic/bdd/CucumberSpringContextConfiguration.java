@@ -76,6 +76,8 @@ public class CucumberSpringContextConfiguration {
 	@Before
 	public void setUp(Scenario scenario) {
 
+		this.world.scenario = scenario;
+
 		LOG.info("Scenario info: " + scenario.getName());
 
 		LOG.info("--------------  Context Initialized For Executing Cucumber Tests --------------");

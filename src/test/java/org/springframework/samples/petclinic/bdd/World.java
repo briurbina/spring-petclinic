@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.bdd;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Component;
 
+import io.cucumber.java.Scenario;
 import io.cucumber.spring.ScenarioScope;
 
 @Component
@@ -12,6 +13,16 @@ public class World {
 	public String baseUrl;
 
 	public WebDriver driver;
+
+	public Scenario scenario;
+
+	public Scenario getScenario() {
+		return scenario;
+	}
+
+	public void setScenario(Scenario scenario) {
+		this.scenario = scenario;
+	}
 
 	public WebDriver getDriver() {
 		return driver;

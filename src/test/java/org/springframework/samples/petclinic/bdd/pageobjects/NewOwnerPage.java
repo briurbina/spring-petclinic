@@ -38,7 +38,7 @@ public class NewOwnerPage {
 	@FindBy(how = How.ID, using = "telephone")
 	private WebElement txtbxTelephone;
 
-	@FindBy(how = How.XPATH, using = "//button[@type='submit']")
+	@FindBy(how = How.CSS, using = "#add-owner-form > div:nth-child(2) > div > button")
 	private WebElement btnAddOwner;
 
 	// TODO: modify to not need base URL
