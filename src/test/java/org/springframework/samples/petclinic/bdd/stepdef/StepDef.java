@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.bdd;
+package org.springframework.samples.petclinic.bdd.stepdef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import org.assertj.core.util.Arrays;
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.bdd.World;
 import org.springframework.samples.petclinic.bdd.pageobjects.FindOwnerPage;
 import org.springframework.samples.petclinic.bdd.pageobjects.FindOwnerResultsPage;
 import org.springframework.samples.petclinic.bdd.pageobjects.NewOwnerPage;
@@ -33,8 +34,6 @@ public class StepDef {
 	private FindOwnerResultsPage findOwnerResultsPage;
 
 	private DataManager dataManager;
-
-	// TODO: currenty tied to chrome
 
 	@Autowired
 	public StepDef(World world) {

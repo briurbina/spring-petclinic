@@ -1,13 +1,22 @@
 package org.springframework.samples.petclinic.bdd;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.management.RuntimeErrorException;
+
+import com.google.common.collect.ImmutableMap;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.Command;
+import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.Response;
 import org.openqa.selenium.safari.SafariDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +55,7 @@ public class CucumberSpringContextConfiguration {
 		WebDriver driver;
 
 		if (browser == null) {
-			WebDriverManager.chromedriver().setup();
-			driver = new ChromeDriver();
+			driver = loadChrome();
 		}
 		else if (browser.equals("safari")) {
 			if (world.driver == null) {
@@ -59,14 +67,54 @@ public class CucumberSpringContextConfiguration {
 			}
 		}
 		else if (browser.equals("chrome")) {
-			WebDriverManager.chromedriver().setup();
-			driver = new ChromeDriver();
+			driver = loadChrome();
 		}
+		// else if (browser.equals("firefox")) {
+		// if (world.driver == null) {
+		// WebDriverManager.firefoxdriver().setup();
+		// driver = new FirefoxDriver();
+		// }
+		// }
 		else {
 			throw new RuntimeException("Invalid browser name!");
 		}
 		this.driver = driver;
 		return driver;
+	}
+
+	private WebDriver loadChrome() {
+		ChromeDriver driver;
+		WebDriverManager.chromedriver().setup();
+		driver = new ChromeDriver();
+		// String browser = System.getProperty("browser");
+		String latency = System.getProperty("latency");
+		String downloadThroughput = System.getProperty("downloadThroughput");
+		String uploadThroughput = System.getProperty("uploadThroughput");
+
+		if (latency != null || downloadThroughput != null || uploadThroughput != null) {
+			CommandExecutor executor = driver.getCommandExecutor();
+
+			// Set the conditions
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("offline", false); // dont need to touch
+			map.put("latency", latency != null ? latency : 0);
+			map.put("download_throughput", downloadThroughput != null ? downloadThroughput : 500 * 1024);
+			map.put("upload_throughput", uploadThroughput != null ? uploadThroughput : 500 * 1024);
+
+			try {
+
+				Response response = executor.execute(new Command(driver.getSessionId(), "setNetworkConditions",
+						ImmutableMap.of("network_conditions", ImmutableMap.copyOf(map))));
+
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+
+			}
+		}
+
+		return driver;
+
 	}
 
 	/**
@@ -94,7 +142,7 @@ public class CucumberSpringContextConfiguration {
 		return baseUrl;
 	}
 
-	@After
+	@After(order = Integer.MAX_VALUE)
 	public void embedScreenshot(Scenario scenario) throws Exception {
 		if (scenario.isFailed()) {
 			try {
@@ -110,6 +158,11 @@ public class CucumberSpringContextConfiguration {
 				cce.printStackTrace();
 			}
 		}
+	}
+
+	@After(order = Integer.MIN_VALUE)
+	public void closeBrowser() {
+		world.driver.quit();
 	}
 
 }
