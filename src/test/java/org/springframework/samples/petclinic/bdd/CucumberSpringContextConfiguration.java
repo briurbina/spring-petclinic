@@ -12,6 +12,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.Command;
 import org.openqa.selenium.remote.CommandExecutor;
@@ -83,16 +84,32 @@ public class CucumberSpringContextConfiguration {
 	}
 
 	private WebDriver loadChrome() {
-		ChromeDriver driver;
+		WebDriver driver;
 		WebDriverManager.chromedriver().setup();
-		driver = new ChromeDriver();
+
+		// Locally
+		// driver = new ChromeDriver();
+
+		// Via docker container
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("headless");
+		options.setAcceptInsecureCerts(true);
+		options.addArguments("--ignore-certificate-errors");
+		options.addArguments("--window-size=1920,1080");
+
+		driver = WebDriverManager.chromedriver().capabilities(options).browserInDocker()
+				.dockerScreenResolution("1920x1080x24").enableRecording().dockerRecordingOutput("target").viewOnly()
+				.dockerExtraHosts("hostlocal:host-gateway").create();
+
 		// String browser = System.getProperty("browser");
 		String latency = System.getProperty("latency");
 		String downloadThroughput = System.getProperty("downloadThroughput");
 		String uploadThroughput = System.getProperty("uploadThroughput");
 
 		if (latency != null || downloadThroughput != null || uploadThroughput != null) {
-			CommandExecutor executor = driver.getCommandExecutor();
+			// FIX THIS!!! DOES NOT WORK YET WITH BROWSER
+			ChromeDriver driver1 = new ChromeDriver();
+			CommandExecutor executor = driver1.getCommandExecutor();
 
 			// Set the conditions
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -103,7 +120,7 @@ public class CucumberSpringContextConfiguration {
 
 			try {
 
-				Response response = executor.execute(new Command(driver.getSessionId(), "setNetworkConditions",
+				Response response = executor.execute(new Command(driver1.getSessionId(), "setNetworkConditions",
 						ImmutableMap.of("network_conditions", ImmutableMap.copyOf(map))));
 
 			}
@@ -146,7 +163,7 @@ public class CucumberSpringContextConfiguration {
 		return baseUrl;
 	}
 
-	@After(order = Integer.MAX_VALUE)
+	// @After(order = Integer.MAX_VALUE)
 	public void embedScreenshot(Scenario scenario) throws Exception {
 		if (scenario.isFailed()) {
 			try {
@@ -164,7 +181,7 @@ public class CucumberSpringContextConfiguration {
 		}
 	}
 
-	@After(order = Integer.MIN_VALUE)
+	// @After(order = Integer.MIN_VALUE)
 	public void closeBrowser() {
 		world.driver.quit();
 	}
