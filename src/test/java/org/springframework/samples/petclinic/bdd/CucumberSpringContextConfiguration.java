@@ -138,6 +138,10 @@ public class CucumberSpringContextConfiguration {
 			baseUrl = "http://localhost:8080/";
 		}
 
+		if (!baseUrl.endsWith("/")) {
+			baseUrl += "/";
+		}
+
 		LOG.info("The Base URL is: " + baseUrl);
 		return baseUrl;
 	}
