@@ -29,10 +29,17 @@ Or you can run it from Maven directly using the Spring Boot Maven plugin. If you
 
 Cucumber testing is setup for this project. This is meant to serve as an example repo for best practices regarding BDD, specifically concise declarative gherkin. This testing is taking place in spring-petclinic/src/test/java/org/springframework/samples/petclinic/bdd.
 
-To run tests with environemnt variables and automatically format:
+To run tests with environment variables and automatically format:
+
+FIRST ... run the application using...
 
 ```(shell)
-./mvnw clean spring-javaformat:apply test -Dbrowser=safari -DbaseUrl=http://localhost:8080/
+./mvnw spring-javaformat:apply spring-boot:run
+```
+NEXT ... run the tests using...
+
+```(shell)
+./mvnw clean spring-javaformat:apply test -Dbrowser=chrome -DbaseUrl=http://localhost:8080/
 ```
 
 For more information see [cucumber readme](src/test/java/org/springframework/samples/petclinic/bdd/readme.md)
