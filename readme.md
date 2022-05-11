@@ -32,7 +32,7 @@ Cucumber testing is setup for this project. This is meant to serve as an example
 To run tests with environemnt variables and automatically format:
 
 ```(shell)
-./mvnw clean spring-javaformat:apply test -Dbrowser=safari -DbaseUrl=http://localhost:8080/
+./mvnw clean spring-javaformat:apply test -Dbrowser=chrome -DbaseUrl=http://localhost:8080/
 ```
 
 For more information see [cucumber readme](src/test/java/org/springframework/samples/petclinic/bdd/readme.md)

@@ -1,7 +1,9 @@
 package org.springframework.samples.petclinic.bdd;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.management.RuntimeErrorException;
 
@@ -12,9 +14,16 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.Command;
 import org.openqa.selenium.remote.CommandExecutor;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.Response;
 import org.openqa.selenium.safari.SafariDriver;
@@ -83,9 +92,12 @@ public class CucumberSpringContextConfiguration {
 	}
 
 	private WebDriver loadChrome() {
+
+		ChromeOptions options = new ChromeOptions();
+		options.setCapability(ChromeOptions.CAPABILITY, getCap());
 		ChromeDriver driver;
 		WebDriverManager.chromedriver().setup();
-		driver = new ChromeDriver();
+		driver = new ChromeDriver(options);
 		// String browser = System.getProperty("browser");
 		String latency = System.getProperty("latency");
 		String downloadThroughput = System.getProperty("downloadThroughput");
@@ -129,6 +141,7 @@ public class CucumberSpringContextConfiguration {
 		LOG.info("Scenario info: " + scenario.getName());
 
 		LOG.info("--------------  Context Initialized For Executing Cucumber Tests --------------");
+
 	}
 
 	private String getBaseUrl() {
@@ -140,6 +153,29 @@ public class CucumberSpringContextConfiguration {
 
 		LOG.info("The Base URL is: " + baseUrl);
 		return baseUrl;
+	}
+
+	// logging
+	private static DesiredCapabilities getCap() {
+		DesiredCapabilities caps = DesiredCapabilities.chrome();
+		LoggingPreferences logPrefs = new LoggingPreferences();
+		// logPrefs.enable(LogType.PERFORMANCE, Level.INFO);
+		// logPrefs.enable(LogType.PROFILER, Level.INFO);
+		logPrefs.enable(LogType.BROWSER, Level.INFO);
+		// logPrefs.enable(LogType.CLIENT, Level.INFO);
+		// logPrefs.enable(LogType.DRIVER, Level.INFO);
+		// logPrefs.enable(LogType.SERVER, Level.INFO);
+		caps.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+		return caps;
+	}
+
+	@After
+	public void analyzeLog(Scenario scenario) {
+		LogEntries logEntries = driver.manage().logs().get(LogType.BROWSER);
+		for (LogEntry entry : logEntries) {
+			scenario.attach(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage(),
+					"text/plain", "browser console log");
+		}
 	}
 
 	@After(order = Integer.MAX_VALUE)

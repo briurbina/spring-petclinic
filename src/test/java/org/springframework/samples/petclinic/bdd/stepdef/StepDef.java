@@ -40,7 +40,7 @@ public class StepDef {
 		WebDriver driver = world.driver;
 		this.newOwnerPage = new NewOwnerPage(driver, world);
 		this.dataManager = DataManager.getInstance();
-		this.ownerInfoPage = new OwnerInfoPage(driver);
+		this.ownerInfoPage = new OwnerInfoPage(world);
 		this.findOwnerPage = new FindOwnerPage(driver, world);
 		this.findOwnerResultsPage = new FindOwnerResultsPage(world);
 	}
@@ -75,7 +75,12 @@ public class StepDef {
 	@Then("they see the results for a {string}")
 	public void they_see_the_results_for_a(String string) {
 		List<Persona> personas = this.dataManager.getPersonasByChunkName(string);
-		this.findOwnerResultsPage.validateOwnerResults(personas);
+		if (personas.size() == 1) {
+			this.ownerInfoPage.validateOwnerInfo(personas.iterator().next());
+		}
+		else {
+			this.findOwnerResultsPage.validateOwnerResults(personas);
+		}
 	}
 
 }

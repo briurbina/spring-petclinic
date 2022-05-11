@@ -1,0 +1,21 @@
+{
+    "name": "Eduardo Rodriquez",
+    "aliases": ["Rodriquez with two dogs", "Eduardo"],
+    "firstName" : "Eduardo",
+	"lastName": "Rodriquez",
+	"address": "2693 Commerce St.",
+	"city": "McFarland",
+	"telephone": "6085558763",
+	"pets": [
+        {
+            "name": "Rosy",
+            "birthDate": "2011-04-17",
+            "petType": "dog"
+        },
+        {
+            "name": "Jewel",
+            "birthDate": "2010-03-07",
+            "petType": "dog"
+        }
+    ]
+}
