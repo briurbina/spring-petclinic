@@ -94,8 +94,7 @@ public class OwnerInfoPage {
 			for (Pet pet : persona.pets) {
 				this.world.scenario.attach(pet.toString(), "text/plain", "expected");
 				this.world.scenario.attach(petLookup.get(pet.name).toString(), "text/plain", "actual");
-				// this.world.scenario.attach(pet.petType.toString(), "text/plain",
-				// "expected");
+				this.world.scenario.attach(pet.petType.toString(), "text/plain", "expected");
 
 				assertEquals(pet, petLookup.get(pet.name));
 			}
