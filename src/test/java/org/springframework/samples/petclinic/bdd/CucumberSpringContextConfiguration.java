@@ -2,6 +2,8 @@ package org.springframework.samples.petclinic.bdd;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.io.IOException;
+import java.time.Duration;
 
 import javax.management.RuntimeErrorException;
 
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.cucumber.java.After;
+import io.cucumber.java.AfterStep;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.spring.CucumberContextConfiguration;
@@ -42,6 +45,8 @@ public class CucumberSpringContextConfiguration {
 	private World world;
 
 	private WebDriver driver;
+
+	private WebDriverManager wdm;
 
 	@Autowired
 	public CucumberSpringContextConfiguration(World world) {
@@ -84,7 +89,7 @@ public class CucumberSpringContextConfiguration {
 	}
 
 	private WebDriver loadChrome() {
-		WebDriver driver;
+		RemoteWebDriver driver;
 		WebDriverManager.chromedriver().setup();
 
 		// Locally
@@ -97,9 +102,10 @@ public class CucumberSpringContextConfiguration {
 		options.addArguments("--ignore-certificate-errors");
 		options.addArguments("--window-size=1920,1080");
 
-		driver = WebDriverManager.chromedriver().capabilities(options).browserInDocker()
+		wdm = WebDriverManager.chromedriver().capabilities(options).browserInDocker()
 				.dockerScreenResolution("1920x1080x24").enableRecording().dockerRecordingOutput("target").viewOnly()
-				.dockerExtraHosts("hostlocal:host-gateway").create();
+				.dockerExtraHosts("hostlocal:host-gateway");
+		driver = (RemoteWebDriver) wdm.create();
 
 		// String browser = System.getProperty("browser");
 		String latency = System.getProperty("latency");
@@ -107,9 +113,7 @@ public class CucumberSpringContextConfiguration {
 		String uploadThroughput = System.getProperty("uploadThroughput");
 
 		if (latency != null || downloadThroughput != null || uploadThroughput != null) {
-			// FIX THIS!!! DOES NOT WORK YET WITH BROWSER
-			ChromeDriver driver1 = new ChromeDriver();
-			CommandExecutor executor = driver1.getCommandExecutor();
+			CommandExecutor executor = driver.getCommandExecutor();
 
 			// Set the conditions
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -120,7 +124,7 @@ public class CucumberSpringContextConfiguration {
 
 			try {
 
-				Response response = executor.execute(new Command(driver1.getSessionId(), "setNetworkConditions",
+				Response response = executor.execute(new Command(driver.getSessionId(), "setNetworkConditions",
 						ImmutableMap.of("network_conditions", ImmutableMap.copyOf(map))));
 
 			}
@@ -139,7 +143,9 @@ public class CucumberSpringContextConfiguration {
 	 * configuration
 	 */
 	@Before
-	public void setUp(Scenario scenario) {
+	public void setUp(Scenario scenario) throws InterruptedException {
+		// Pause for better recording
+		Thread.sleep(Duration.ofSeconds(2).toMillis());
 
 		this.world.scenario = scenario;
 
@@ -163,7 +169,7 @@ public class CucumberSpringContextConfiguration {
 		return baseUrl;
 	}
 
-	// @After(order = Integer.MAX_VALUE)
+	@After(order = Integer.MAX_VALUE)
 	public void embedScreenshot(Scenario scenario) throws Exception {
 		if (scenario.isFailed()) {
 			try {
@@ -182,8 +188,18 @@ public class CucumberSpringContextConfiguration {
 	}
 
 	// @After(order = Integer.MIN_VALUE)
-	public void closeBrowser() {
-		world.driver.quit();
+	// public void closeBrowser() {
+	// world.driver.quit();
+	// }
+
+	@After
+	public void AfterScenario() throws IOException {
+		wdm.quit();
+	}
+
+	@AfterStep
+	public void PauseForRecording(Scenario scenario) throws InterruptedException {
+		Thread.sleep(Duration.ofSeconds(2).toMillis());
 	}
 
 }
