@@ -9,6 +9,7 @@ import javax.management.RuntimeErrorException;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -97,15 +98,21 @@ public class CucumberSpringContextConfiguration {
 
 		// Via docker container
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("headless");
-		options.setAcceptInsecureCerts(true);
+		options.addArguments("--headless");
 		options.addArguments("--ignore-certificate-errors");
 		options.addArguments("--window-size=1920,1080");
+		options.addArguments("--disable-gpu");
+		options.addArguments("--disable-extensions");
+		options.addArguments("--no-sandbox");
+		options.addArguments("--disable-dev-shm-usage");
+		options.setAcceptInsecureCerts(true);
 
-		wdm = WebDriverManager.chromedriver().capabilities(options).browserInDocker()
-				.dockerScreenResolution("1920x1080x24").enableRecording().dockerRecordingOutput("target").viewOnly()
+		wdm = WebDriverManager.chromedriver().capabilities(options).browserInDocker().enableRecording()
+				.dockerScreenResolution("1920x1080x24").dockerRecordingOutput("target").viewOnly()
 				.dockerExtraHosts("hostlocal:host-gateway");
 		driver = (RemoteWebDriver) wdm.create();
+		// I don't know why we need this but the --window-size above seems to be ignored?
+		driver.manage().window().setSize(new Dimension(1920, 1080));
 
 		// String browser = System.getProperty("browser");
 		String latency = System.getProperty("latency");
@@ -158,7 +165,7 @@ public class CucumberSpringContextConfiguration {
 		String baseUrl = System.getProperty("baseUrl");
 
 		if (baseUrl == null) {
-			baseUrl = "http://localhost:8080/";
+			baseUrl = "http://hostlocal:8080/";
 		}
 
 		if (!baseUrl.endsWith("/")) {
