@@ -18,6 +18,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.Command;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -84,12 +85,9 @@ public class CucumberSpringContextConfiguration {
 		else if (browser.equals("chrome")) {
 			driver = loadChrome();
 		}
-		// else if (browser.equals("firefox")) {
-		// if (world.driver == null) {
-		// WebDriverManager.firefoxdriver().setup();
-		// driver = new FirefoxDriver();
-		// }
-		// }
+		else if (browser.equals("firefox")) {
+			driver = loadFirefox();
+		}
 		else {
 			throw new RuntimeException("Invalid browser name!");
 		}
@@ -128,7 +126,6 @@ public class CucumberSpringContextConfiguration {
 			driver.manage().window().setSize(new Dimension(1920, 1080));
 		}
 
-		// String browser = System.getProperty("browser");
 		String latency = System.getProperty("latency");
 		String downloadThroughput = System.getProperty("downloadThroughput");
 		String uploadThroughput = System.getProperty("uploadThroughput");
@@ -154,6 +151,36 @@ public class CucumberSpringContextConfiguration {
 				throw new RuntimeException(e);
 
 			}
+		}
+
+		return driver;
+
+	}
+
+	private WebDriver loadFirefox() {
+		WebDriver driver;
+		WebDriverManager.firefoxdriver().setup();
+
+		FirefoxOptions options = new FirefoxOptions();
+		options.addArguments("--width=1920");
+		options.addArguments("--height=1080");
+		options.setAcceptInsecureCerts(true);
+
+		if (this.world.local) {
+			// Local browser
+			wdm = WebDriverManager.firefoxdriver().capabilities(options);
+			driver = wdm.create();
+		}
+		else {
+			// Via docker container
+			options.addArguments("--headless");
+			wdm = WebDriverManager.firefoxdriver().capabilities(options).browserInDocker().enableRecording()
+					.dockerScreenResolution("1920x1080x24").dockerRecordingOutput("target").viewOnly()
+					.dockerExtraHosts("hostlocal:host-gateway");
+			driver = wdm.create();
+			// I don't know why we need this but the --window-size above seems to be
+			// ignored?
+			driver.manage().window().setSize(new Dimension(1920, 1080));
 		}
 
 		return driver;
