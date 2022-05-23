@@ -5,6 +5,7 @@ import java.util.Map;
 import java.io.IOException;
 import java.time.Duration;
 
+import javax.lang.model.util.ElementScanner6;
 import javax.management.RuntimeErrorException;
 
 import com.google.common.collect.ImmutableMap;
@@ -52,14 +53,21 @@ public class CucumberSpringContextConfiguration {
 	@Autowired
 	public CucumberSpringContextConfiguration(World world) {
 		this.world = world;
-		world.baseUrl = getBaseUrl();
-		world.driver = getDriver(world);
+		this.world.local = getRemoteOrLocal();
+		this.world.baseUrl = getBaseUrl();
+		this.world.driver = getDriver();
 	}
 
-	private WebDriver getDriver(World world) {
-		String browser = System.getProperty("browser");
+	private WebDriver getDriver() {
 
 		WebDriver driver;
+		// Boolean local = true;
+
+		// if (System.getProperty("local") == null) {
+		// local = false;
+		// }
+
+		String browser = System.getProperty("browser");
 
 		if (browser == null) {
 			driver = loadChrome();
@@ -85,20 +93,16 @@ public class CucumberSpringContextConfiguration {
 		else {
 			throw new RuntimeException("Invalid browser name!");
 		}
+
 		this.driver = driver;
 		return driver;
 	}
 
 	private WebDriver loadChrome() {
-		RemoteWebDriver driver;
+		WebDriver driver;
 		WebDriverManager.chromedriver().setup();
 
-		// Locally
-		// driver = new ChromeDriver();
-
-		// Via docker container
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless");
 		options.addArguments("--ignore-certificate-errors");
 		options.addArguments("--window-size=1920,1080");
 		options.addArguments("--disable-gpu");
@@ -107,20 +111,31 @@ public class CucumberSpringContextConfiguration {
 		options.addArguments("--disable-dev-shm-usage");
 		options.setAcceptInsecureCerts(true);
 
-		wdm = WebDriverManager.chromedriver().capabilities(options).browserInDocker().enableRecording()
-				.dockerScreenResolution("1920x1080x24").dockerRecordingOutput("target").viewOnly()
-				.dockerExtraHosts("hostlocal:host-gateway");
-		driver = (RemoteWebDriver) wdm.create();
-		// I don't know why we need this but the --window-size above seems to be ignored?
-		driver.manage().window().setSize(new Dimension(1920, 1080));
+		if (this.world.local) {
+			// Local browser
+			wdm = WebDriverManager.chromedriver().capabilities(options);
+			driver = wdm.create();
+		}
+		else {
+			// Via docker container
+			options.addArguments("--headless");
+			wdm = WebDriverManager.chromedriver().capabilities(options).browserInDocker().enableRecording()
+					.dockerScreenResolution("1920x1080x24").dockerRecordingOutput("target").viewOnly()
+					.dockerExtraHosts("hostlocal:host-gateway");
+			driver = wdm.create();
+			// I don't know why we need this but the --window-size above seems to be
+			// ignored?
+			driver.manage().window().setSize(new Dimension(1920, 1080));
+		}
 
 		// String browser = System.getProperty("browser");
 		String latency = System.getProperty("latency");
 		String downloadThroughput = System.getProperty("downloadThroughput");
 		String uploadThroughput = System.getProperty("uploadThroughput");
 
-		if (latency != null || downloadThroughput != null || uploadThroughput != null) {
-			CommandExecutor executor = driver.getCommandExecutor();
+		// THIS APPEARS TO ONLY WORK ON LOCAL TESTING
+		if (world.local && (latency != null || downloadThroughput != null || uploadThroughput != null)) {
+			CommandExecutor executor = ((ChromeDriver) driver).getCommandExecutor();
 
 			// Set the conditions
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -131,8 +146,8 @@ public class CucumberSpringContextConfiguration {
 
 			try {
 
-				Response response = executor.execute(new Command(driver.getSessionId(), "setNetworkConditions",
-						ImmutableMap.of("network_conditions", ImmutableMap.copyOf(map))));
+				Response response = executor.execute(new Command(((ChromeDriver) driver).getSessionId(),
+						"setNetworkConditions", ImmutableMap.of("network_conditions", ImmutableMap.copyOf(map))));
 
 			}
 			catch (Exception e) {
@@ -165,7 +180,12 @@ public class CucumberSpringContextConfiguration {
 		String baseUrl = System.getProperty("baseUrl");
 
 		if (baseUrl == null) {
-			baseUrl = "http://hostlocal:8080/";
+			if (this.world.local) {
+				baseUrl = "http://localhost:8080/";
+			}
+			else {
+				baseUrl = "http://hostlocal:8080/";
+			}
 		}
 
 		if (!baseUrl.endsWith("/")) {
@@ -174,6 +194,15 @@ public class CucumberSpringContextConfiguration {
 
 		LOG.info("The Base URL is: " + baseUrl);
 		return baseUrl;
+	}
+
+	private Boolean getRemoteOrLocal() {
+		Boolean local = true;
+
+		if (System.getProperty("local") == null) {
+			local = false;
+		}
+		return local;
 	}
 
 	@After(order = Integer.MAX_VALUE)
