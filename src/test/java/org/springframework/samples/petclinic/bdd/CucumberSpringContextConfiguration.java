@@ -2,17 +2,23 @@ package org.springframework.samples.petclinic.bdd;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.io.IOException;
+import java.time.Duration;
 
+import javax.lang.model.util.ElementScanner6;
 import javax.management.RuntimeErrorException;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.Command;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -24,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.cucumber.java.After;
+import io.cucumber.java.AfterStep;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.spring.CucumberContextConfiguration;
@@ -42,17 +49,26 @@ public class CucumberSpringContextConfiguration {
 
 	private WebDriver driver;
 
+	private WebDriverManager wdm;
+
 	@Autowired
 	public CucumberSpringContextConfiguration(World world) {
 		this.world = world;
-		world.baseUrl = getBaseUrl();
-		world.driver = getDriver(world);
+		this.world.local = getRemoteOrLocal();
+		this.world.baseUrl = getBaseUrl();
+		this.world.driver = getDriver();
 	}
 
-	private WebDriver getDriver(World world) {
-		String browser = System.getProperty("browser");
+	private WebDriver getDriver() {
 
 		WebDriver driver;
+		// Boolean local = true;
+
+		// if (System.getProperty("local") == null) {
+		// local = false;
+		// }
+
+		String browser = System.getProperty("browser");
 
 		if (browser == null) {
 			driver = loadChrome();
@@ -69,30 +85,54 @@ public class CucumberSpringContextConfiguration {
 		else if (browser.equals("chrome")) {
 			driver = loadChrome();
 		}
-		// else if (browser.equals("firefox")) {
-		// if (world.driver == null) {
-		// WebDriverManager.firefoxdriver().setup();
-		// driver = new FirefoxDriver();
-		// }
-		// }
+		else if (browser.equals("firefox")) {
+			driver = loadFirefox();
+		}
 		else {
 			throw new RuntimeException("Invalid browser name!");
 		}
+
 		this.driver = driver;
 		return driver;
 	}
 
 	private WebDriver loadChrome() {
-		ChromeDriver driver;
+		WebDriver driver;
 		WebDriverManager.chromedriver().setup();
-		driver = new ChromeDriver();
-		// String browser = System.getProperty("browser");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--ignore-certificate-errors");
+		options.addArguments("--window-size=1920,1080");
+		options.addArguments("--disable-gpu");
+		options.addArguments("--disable-extensions");
+		options.addArguments("--no-sandbox");
+		options.addArguments("--disable-dev-shm-usage");
+		options.setAcceptInsecureCerts(true);
+
+		if (this.world.local) {
+			// Local browser
+			wdm = WebDriverManager.chromedriver().capabilities(options);
+			driver = wdm.create();
+		}
+		else {
+			// Via docker container
+			options.addArguments("--headless");
+			wdm = WebDriverManager.chromedriver().capabilities(options).browserInDocker().enableRecording()
+					.dockerScreenResolution("1920x1080x24").dockerRecordingOutput("target").viewOnly()
+					.dockerExtraHosts("hostlocal:host-gateway");
+			driver = wdm.create();
+			// I don't know why we need this but the --window-size above seems to be
+			// ignored?
+			driver.manage().window().setSize(new Dimension(1920, 1080));
+		}
+
 		String latency = System.getProperty("latency");
 		String downloadThroughput = System.getProperty("downloadThroughput");
 		String uploadThroughput = System.getProperty("uploadThroughput");
 
-		if (latency != null || downloadThroughput != null || uploadThroughput != null) {
-			CommandExecutor executor = driver.getCommandExecutor();
+		// THIS APPEARS TO ONLY WORK ON LOCAL TESTING
+		if (world.local && (latency != null || downloadThroughput != null || uploadThroughput != null)) {
+			CommandExecutor executor = ((ChromeDriver) driver).getCommandExecutor();
 
 			// Set the conditions
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -103,8 +143,8 @@ public class CucumberSpringContextConfiguration {
 
 			try {
 
-				Response response = executor.execute(new Command(driver.getSessionId(), "setNetworkConditions",
-						ImmutableMap.of("network_conditions", ImmutableMap.copyOf(map))));
+				Response response = executor.execute(new Command(((ChromeDriver) driver).getSessionId(),
+						"setNetworkConditions", ImmutableMap.of("network_conditions", ImmutableMap.copyOf(map))));
 
 			}
 			catch (Exception e) {
@@ -117,12 +157,44 @@ public class CucumberSpringContextConfiguration {
 
 	}
 
+	private WebDriver loadFirefox() {
+		WebDriver driver;
+		WebDriverManager.firefoxdriver().setup();
+
+		FirefoxOptions options = new FirefoxOptions();
+		options.addArguments("--width=1920");
+		options.addArguments("--height=1080");
+		options.setAcceptInsecureCerts(true);
+
+		if (this.world.local) {
+			// Local browser
+			wdm = WebDriverManager.firefoxdriver().capabilities(options);
+			driver = wdm.create();
+		}
+		else {
+			// Via docker container
+			options.addArguments("--headless");
+			wdm = WebDriverManager.firefoxdriver().capabilities(options).browserInDocker().enableRecording()
+					.dockerScreenResolution("1920x1080x24").dockerRecordingOutput("target").viewOnly()
+					.dockerExtraHosts("hostlocal:host-gateway");
+			driver = wdm.create();
+			// I don't know why we need this but the --window-size above seems to be
+			// ignored?
+			driver.manage().window().setSize(new Dimension(1920, 1080));
+		}
+
+		return driver;
+
+	}
+
 	/**
 	 * Need this method so the cucumber will recognize this class as glue context
 	 * configuration
 	 */
 	@Before
-	public void setUp(Scenario scenario) {
+	public void setUp(Scenario scenario) throws InterruptedException {
+		// Pause for better recording
+		Thread.sleep(Duration.ofSeconds(2).toMillis());
 
 		this.world.scenario = scenario;
 
@@ -135,11 +207,29 @@ public class CucumberSpringContextConfiguration {
 		String baseUrl = System.getProperty("baseUrl");
 
 		if (baseUrl == null) {
-			baseUrl = "http://localhost:8080/";
+			if (this.world.local) {
+				baseUrl = "http://localhost:8080/";
+			}
+			else {
+				baseUrl = "http://hostlocal:8080/";
+			}
+		}
+
+		if (!baseUrl.endsWith("/")) {
+			baseUrl += "/";
 		}
 
 		LOG.info("The Base URL is: " + baseUrl);
 		return baseUrl;
+	}
+
+	private Boolean getRemoteOrLocal() {
+		Boolean local = true;
+
+		if (System.getProperty("local") == null) {
+			local = false;
+		}
+		return local;
 	}
 
 	@After(order = Integer.MAX_VALUE)
@@ -160,9 +250,19 @@ public class CucumberSpringContextConfiguration {
 		}
 	}
 
-	@After(order = Integer.MIN_VALUE)
-	public void closeBrowser() {
-		world.driver.quit();
+	// @After(order = Integer.MIN_VALUE)
+	// public void closeBrowser() {
+	// world.driver.quit();
+	// }
+
+	@After
+	public void AfterScenario() throws IOException {
+		wdm.quit();
+	}
+
+	@AfterStep
+	public void PauseForRecording(Scenario scenario) throws InterruptedException {
+		Thread.sleep(Duration.ofSeconds(2).toMillis());
 	}
 
 }

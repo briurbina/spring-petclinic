@@ -16,6 +16,8 @@ public class World {
 
 	public Scenario scenario;
 
+	public Boolean local;
+
 	public Scenario getScenario() {
 		return scenario;
 	}
